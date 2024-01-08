@@ -3,6 +3,7 @@ import logging
 
 class Node:
     def __init__(self):
+        config.load_incluster_config()
         self.api = client.CoreV1Api()
 
     def get_node_status(self, node_name):
@@ -24,9 +25,6 @@ class Node:
         return node_ready_status
     
     def get_node_name(self):
-        # Load the in-cluster config
-        config.load_incluster_config()
-
         # Get current namespace
         namespace = open("/var/run/secrets/kubernetes.io/serviceaccount/namespace").read()
         
@@ -41,3 +39,18 @@ class Node:
         logging.info('Found node name: %s' % node_name)
         
         return node_name
+    
+    def get_node_taint(self, node_name):
+        # Get the node's taints
+        node_taints = self.api.read_node(node_name).spec.taints
+        
+        # If node_taints is None, return False
+        if node_taints is None:
+            return False
+        
+        # If there is a taint with key 'ToBeDeletedByClusterAutoscaler' and effect 'NoSchedule', return True
+        for taint in node_taints:
+            if taint.key == 'ToBeDeletedByClusterAutoscaler' and taint.effect == 'NoSchedule':
+                return True
+        
+        return False
