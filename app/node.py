@@ -1,5 +1,4 @@
 from kubernetes import client, config
-import logging
 
 class Node:
     def __init__(self):
@@ -19,9 +18,6 @@ class Node:
         else:
             node_ready_status = 'NotReady'
 
-        # Log the node's ready status as INFO
-        logging.info('Found node %s status: %s' % (node_name, node_ready_status))
-
         return node_ready_status
     
     def get_node_name(self):
@@ -34,9 +30,6 @@ class Node:
         
         # Get the node name
         node_name = pod.spec.node_name
-        
-        # Log the node name as INFO
-        logging.info('Found node name: %s' % node_name)
         
         return node_name
     
