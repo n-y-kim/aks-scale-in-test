@@ -5,15 +5,16 @@ import sys
 
 from node import Node
 from pdb import Pdb
+from deployment import Deployment
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-handler = logging.StreamHandler()
-formatter = logging.Formatter('[%(asctime)s|%(levelname)s] - %(message)s')
-handler.setFormatter(formatter) 
-
-logger.addHandler(handler)
+if not logger.handlers:
+    handler = logging.StreamHandler()
+    formatter = logging.Formatter('%(asctime)s|%(levelname)s] - %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
 
 # Write log with level INFO, with time and messsage
 
@@ -35,7 +36,31 @@ def main():
         logger.info("Running on node: %s" % my_node_name)
         logger.info("Node status: %s" % my_node_status)
         
-        if sigterm_received or my_node_taint or my_node_status == 'NotReady':
+        # If the node is candidate for deletion, create shield pod to prevent scale-in
+        # if my_node_taint == "DeletionCandidateOfClusterAutoscaler":
+        #     logger.info("Node is candidate for deletion. Creating shield pod...")
+            
+        #     deploy = Deployment()
+        #     if deploy.have_deployment("default", "shield-deployment-" + my_node_name):
+        #         logger.info("Shield pod already exists. No need to create.")
+        #         pass
+        #     else: 
+        #         response = deploy.create_deployment("default", "shield_app.yaml", my_node_name)
+        #         # Print create success response
+        #         logger.info("Shield pod created with name: %s" % response)
+        
+        if sigterm_received or my_node_taint=="ToBeDeletedByClusterAutoscaler" or my_node_status == 'NotReady':
+            
+            logger.info("Node is candidate for deletion. Creating shield pod...")
+            
+            deploy = Deployment()
+            if deploy.have_deployment("default", "shield-deployment-" + my_node_name):
+                logger.info("Shield pod already exists. No need to create.")
+                pass
+            else: 
+                response = deploy.create_deployment("default", "shield_app.yaml", my_node_name)
+                # Print create success response
+                logger.info("Shield pod created with name: %s" % response)
             
             logger.info("=====================================")
             logger.info('SIGTERM received: %s' % sigterm_received)
@@ -48,12 +73,12 @@ def main():
             
             logger.info("Script finished.")
             logger.info("=====================================")
-            # logger.info("Changing PDB for scale-in operation.")
+            logger.info("Deleting deployment to scale-in.")
             
-            # pdb = Pdb()
-            # pdb.patch_pdb()
-            
-            # logger.info("Changed minimum available pods to 0.")
+            if deploy.delete_deployment("default", "shield-deployment-" + my_node_name):
+                logger.info("Deleted deployment")
+            else:
+                logger.info("Deployment does not exist. No need to delete.")
             logger.info("Exiting....")
             sigterm_received = True
             exit(0)

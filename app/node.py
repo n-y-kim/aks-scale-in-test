@@ -39,11 +39,11 @@ class Node:
         
         # If node_taints is None, return False
         if node_taints is None:
-            return False
+            return ""
         
         # If there is a taint with key 'ToBeDeletedByClusterAutoscaler' and effect 'NoSchedule', return True
         for taint in node_taints:
-            if taint.key == 'ToBeDeletedByClusterAutoscaler' and taint.effect == 'NoSchedule':
-                return True
+            if (taint.key == 'ToBeDeletedByClusterAutoscaler' and taint.effect == 'NoSchedule') or (taint.key == 'DeletionCandidateOfClusterAutoscaler' and taint.effect == 'PreferNoSchedule'):
+                return taint.key
         
-        return False
+        return ""

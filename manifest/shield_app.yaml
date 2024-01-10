@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shield-deployment
+  labels:
+    app: shield-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: shield-app
+  template:
+    metadata:
+      labels:
+        app: shield-app
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: "<node-name>"
+      containers:
+      - name: shield-container
+        image: nginx:latest
+      tolerations:
+      - key: "DeletionCandidateOfClusterAutoscaler"
+        operator: "Equal"
+        value: "PreferNoSchedule"
+        effect: "NoSchedule"
+      - key: "ToBeDeletedByClusterAutoscaler"
+        operator: "Exists"
+        effect: "NoSchedule"

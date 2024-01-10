@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pdb-app
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pdb-app
+  template:
+    metadata:
+      labels:
+        app: pdb-app
+    spec:
+      containers:
+      - name: pdb-app
+        image: nginx:latest
