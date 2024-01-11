@@ -8,4 +8,4 @@ COPY manifest/shield_app.yaml ./
 # Install the dependencies
 RUN pip install -r requirements.txt
 # Run dummy_log.py when the container launches
-CMD ["python", "-u", "dummy_log.py"]
+CMD ["python", "-u", "app.py"]

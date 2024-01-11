@@ -47,3 +47,35 @@ class Node:
                 return taint.key
         
         return ""
+    
+    def add_taint(self, node_name, taint_key, taint_effect):
+        # Add taint to node using patch kubernetes api
+        node = self.api.read_node(node_name)
+        
+        # Add taint to node
+        new_taint = client.V1Taint(effect=taint_effect, key=taint_key, value='true')
+        
+        # If the node already has taints, append the new taint to the existing taints
+        if node.spec.taints is not None:
+            node.spec.taints.append(new_taint)
+        else:
+            node.spec.taints = [new_taint]
+        
+        # Patch the node
+        thread = self.api.patch_node(node_name, node)
+        
+        return thread
+    
+    def add_annotation(self, node_name, annotation_key, annotation_value):
+        # Read the existing node
+        node = self.api.read_node(node_name)
+
+        # If the node already has annotations, add the new annotation to the dictionary
+        if node.metadata.annotations is not None:
+            node.metadata.annotations[annotation_key] = annotation_value
+        # If the node doesn't have any annotations, initialize the annotations dictionary with the new annotation
+        else:
+            node.metadata.annotations = {annotation_key: annotation_value}
+
+        # Update the node with the new annotation
+        return self.api.patch_node(node_name, node)

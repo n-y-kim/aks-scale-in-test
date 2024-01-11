@@ -34,6 +34,17 @@ class Deployment:
             return True
         except:
             return False
+        
+    def check_other_deployments(self):        
+        # Get all deployments
+        deployments = self.api_instance.list_namespaced_deployment(namespace="default")
+        
+        # Check if there are any deployments with name starting with 'shield-deployment-'
+        for deployment in deployments.items:
+            if deployment.metadata.name.startswith("shield-deployment-"):
+                return True
+        
+        return False
 
 # Usage:
 # dep = Deployment()
