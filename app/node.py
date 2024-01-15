@@ -52,11 +52,16 @@ class Node:
         # Add taint to node using patch kubernetes api
         node = self.api.read_node(node_name)
         
-        # Add taint to node
+        # Create new taint
         new_taint = client.V1Taint(effect=taint_effect, key=taint_key, value='true')
         
-        # If the node already has taints, append the new taint to the existing taints
+        # If the node already has taints, check if the new taint already exists
         if node.spec.taints is not None:
+            for taint in node.spec.taints:
+                if taint.key == taint_key and taint.effect == taint_effect:
+                    # The taint already exists, so return
+                    return
+            # The taint doesn't exist, so append the new taint to the existing taints
             node.spec.taints.append(new_taint)
         else:
             node.spec.taints = [new_taint]

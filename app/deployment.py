@@ -1,6 +1,8 @@
 from kubernetes import client, config
 import yaml
+import logging
 
+logger = logging.getLogger(__name__)
 class Deployment:
     def __init__(self):
         config.load_incluster_config()
@@ -32,7 +34,8 @@ class Deployment:
         try:
             self.api_instance.delete_namespaced_deployment(deployment_name, namespace)
             return True
-        except:
+        except Exception as e:
+            logger.info(f"Exception when deleting deployment: {e}")
             return False
         
     def check_other_deployments(self):        

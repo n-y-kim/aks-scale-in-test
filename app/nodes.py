@@ -2,7 +2,7 @@ from kubernetes import client, config
 
 class Nodes:
     def __init__(self):
-        config.load_kube_config()
+        config.load_incluster_config()
         self.v1 = client.CoreV1Api()
 
     def get_nodes_with_annotation(self, annotation_key):

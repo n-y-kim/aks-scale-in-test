@@ -6,6 +6,7 @@ import sys
 from node import Node
 from pdb import Pdb
 from deployment import Deployment
+from nodes import Nodes
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
@@ -51,8 +52,6 @@ def main():
         
         # If the node is candidate for deletion, create shield pod to prevent scale-in
         if my_node_taint == CANDIDATE_TAINT:
-            logger.info("Node is candidate for deletion. Creating shield pod...")
-            
             deploy = Deployment()
             
             if deploy.check_other_deployments():
@@ -60,33 +59,39 @@ def main():
                 
                 add_annotation = node.add_annotation(my_node_name, NO_SCALE_DOWN_ANNOTATION, "true")
                 
-                logger.info("Adding annotation result: %s" % add_annotation)
-                logger.info("Exiting...")
+                logger.info("Adding annotation to prevent scale-down")
+                logger.info("Continuing the loop...")
                 
-                exit(0)
+                time.sleep(5)
+                continue
             else:
                 response = deploy.create_deployment("default", "shield_app.yaml", my_node_name)
                 # Print create success response
-                logger.info("Shield pod created with name: %s" % response)
+                logger.info("Shield pod created.")
         
             run_script(node, my_node_name)
             
-            # Delete annotations in another nodes
-            nodes = node.get_nodes_with_annotation(NO_SCALE_DOWN_ANNOTATION)
-            nodes.update_annotations(NO_SCALE_DOWN_ANNOTATION, "false")
+            # Delete annotations in another nodes            
+            nodes = Nodes()
+            nodes_with_annotation = nodes.get_nodes_with_annotation(NO_SCALE_DOWN_ANNOTATION)
+            for node_with_annotation in nodes_with_annotation:
+                logger.info("Deleting annotation in node: %s" % node_with_annotation.metadata.name)
+                nodes.update_annotations(node_with_annotation.metadata.name, NO_SCALE_DOWN_ANNOTATION, "false")
             
-            node.add_taint(my_node_name, CANDIDATE_TAINT, "PreferNoSchedule")
+            patch_node_response = node.add_taint(my_node_name, CANDIDATE_TAINT, "PreferNoSchedule")
+            logger.info("Candidate taint added again to prevent un-candidate.")
             
             # Delete shield deployment
             response = deploy.delete_deployment("default", "shield-deployment-" + my_node_name)
-            logger.info("Shield pod deleted with name: %s" % response)
+            logger.info("Shield pod deleted: %s" % response)
             
             # Make this node as the final candidate for deletion
             logger.info("Making this node as the final candidate for deletion...")
             
             taint_added_result = node.add_taint(my_node_name, "ToBeDeletedByClusterAutoscaler", "NoSchedule")
             
-            logger.info("Taint added result: %s" % taint_added_result)
+            #logger.info("Taint added result: %s" % taint_added_result)
+            logger.info("Taint added.")
             
             exit(0)
             
