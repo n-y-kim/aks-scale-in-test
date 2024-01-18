@@ -34,4 +34,4 @@ spec:
               topologyKey: kubernetes.io/hostname
       containers:
       - name: log-app-container
-        image: nginx
+        image: scloudacr.azurecr.io/simple-app:latest
