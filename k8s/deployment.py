@@ -7,6 +7,42 @@ class Deployment:
     def __init__(self):
         config.load_incluster_config()
         self.api_instance = client.AppsV1Api()
+    
+    # Update deployment
+    # Add priorityClassName(system-node-critical) to the deployment
+    def add_priority_class(self, namespace, deployment_name):
+        body = {
+            "spec": {
+                "template": {
+                    "spec": {
+                        "priorityClassName": "system-node-critical"
+                    }
+                }
+            }
+        }
+        resp = self.api_instance.patch_namespaced_deployment(
+            name=deployment_name,
+            namespace=namespace,
+            body=body
+        )
+        return resp
+
+    def delete_priority_class(self, namespace, deployment_name):
+        body = {
+            "spec": {
+                "template": {
+                    "spec": {
+                        "priorityClassName": None
+                    }
+                }
+            }
+        }
+        resp = self.api_instance.patch_namespaced_deployment(
+            name=deployment_name,
+            namespace=namespace,
+            body=body
+        )
+        return resp
 
     def create_deployment(self, namespace, yaml_file_path, node_name):
         with open(yaml_file_path) as file:

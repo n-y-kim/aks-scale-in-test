@@ -19,3 +19,13 @@ class Nodes:
             }
         }
         return self.v1.patch_node(node_name, body)
+    
+    def delete_annotations(self, node_name, annotation_key):
+        body = {
+            "metadata": {
+                "annotations": {
+                    annotation_key: None
+                }
+            }
+        }
+        return self.v1.patch_node(node_name, body)

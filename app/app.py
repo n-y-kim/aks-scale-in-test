@@ -3,10 +3,10 @@ import time
 import signal
 import sys
 
-from node import Node
-from pdb import Pdb
-from deployment import Deployment
-from nodes import Nodes
+from k8s.node import Node
+from k8s.pdb import Pdb
+from k8s.deployment import Deployment
+from k8s.nodes import Nodes
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
@@ -76,7 +76,7 @@ def main():
             nodes_with_annotation = nodes.get_nodes_with_annotation(NO_SCALE_DOWN_ANNOTATION)
             for node_with_annotation in nodes_with_annotation:
                 logger.info("Deleting annotation in node: %s" % node_with_annotation.metadata.name)
-                nodes.update_annotations(node_with_annotation.metadata.name, NO_SCALE_DOWN_ANNOTATION, "false")
+                nodes.delete_annotations(node_with_annotation.metadata.name, NO_SCALE_DOWN_ANNOTATION)
             
             patch_node_response = node.add_taint(my_node_name, CANDIDATE_TAINT, "PreferNoSchedule")
             logger.info("Candidate taint added again to prevent un-candidate.")
