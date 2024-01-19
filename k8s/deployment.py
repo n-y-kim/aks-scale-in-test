@@ -43,8 +43,11 @@ class Deployment:
             body=body
         )
         return resp
-
+    
     def create_deployment(self, namespace, yaml_file_path, node_name):
+        
+
+    def create_shield_deployment(self, namespace, yaml_file_path, node_name):
         with open(yaml_file_path) as file:
             dep = yaml.safe_load(file)
             # Change the node name in the yaml file

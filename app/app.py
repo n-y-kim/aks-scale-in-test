@@ -65,7 +65,7 @@ def main():
                 time.sleep(5)
                 continue
             else:
-                response = deploy.create_deployment("default", "shield_app.yaml", my_node_name)
+                response = deploy.create_shield_deployment("default", "shield_app.yaml", my_node_name)
                 # Print create success response
                 logger.info("Shield pod created.")
         
