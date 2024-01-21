@@ -1,13 +1,6 @@
-import logging
 import time
 
-logger = logging.getLogger(__name__)
-logging.basicConfig(
-    format='[%(asctime)s|%(levelname)s] - %(message)s',
-    level=logging.INFO,
-    datefmt='%Y-%m-%d %H:%M:%S'
-)
-
+from loggingconfig.logs import logger
 from k8s.node import Node
 from k8s.deployment import Deployment
 

@@ -1,19 +1,11 @@
-import logging
 import time
 import signal
-import sys
 
 from k8s.node import Node
 from k8s.pdb import Pdb
 from k8s.deployment import Deployment
 from k8s.nodes import Nodes
-
-logger = logging.getLogger(__name__)
-logging.basicConfig(
-    format='%(asctime)s|%(levelname)s] - %(message)s',
-    level=logging.INFO,
-    datefmt='%Y-%m-%d %H:%M:%S'
-)
+from loggingconfig.logs import logger
 
 CANDIDATE_TAINT = "DeletionCandidateOfClusterAutoscaler"
 FINAL_TAINT = "ToBeDeletedByClusterAutoscaler"
@@ -23,7 +15,7 @@ NO_SCALE_DOWN_ANNOTATION = "cluster-autoscaler.kubernetes.io/scale-down-disabled
 
 def signal_handler(sig, frame):
     global sigterm_received
-    logging.info('Received SIGTERM. Changing sigterm_received to True.')
+    logger.info('Received SIGTERM. Changing sigterm_received to True.')
     sigterm_received = True
 
 def run_script(node, my_node_name): #180s
