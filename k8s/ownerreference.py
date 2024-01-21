@@ -6,7 +6,7 @@ class OwnerReference:
         self.kind = kind
         self.name = name
         self.uid = uid
-        owner_reference = client.V1OwnerReference(
+        self.owner_reference = client.V1OwnerReference(
             api_version='apps/v1',
             block_owner_deletion=True,
             controller=True,
@@ -14,4 +14,5 @@ class OwnerReference:
             name=name,
             uid=uid)
 
-        return owner_reference
+    def get_owner_reference(self):
+        return self.owner_reference
