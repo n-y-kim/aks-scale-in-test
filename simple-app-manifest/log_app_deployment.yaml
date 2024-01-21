@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: log-agent
+  name: <name of the node>-log-agent
 spec:
-  replicas: 10 # Number of maximum nodes
+  replicas: 1 # Number of maximum nodes
   selector:
     matchLabels:
       app: log-app

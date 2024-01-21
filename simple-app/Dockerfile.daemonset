@@ -1,0 +1,12 @@
+# Use Python 3.11 as the base image
+FROM --platform=linux/amd64 python:3.11
+# Set the working directory in the container
+WORKDIR /app
+# Copy daemonset-app.py and requirements.txt into the container at /app
+COPY simple-app/daemonset-app.py simple-app/requirements.txt ./
+COPY ./k8s/ ./k8s/
+COPY ./loggingconfig/ ./loggingconfig/
+COPY ./simple-app-manifest/log_app_deployment.yaml ./
+RUN pip install -r requirements.txt
+# Run daemonset-app.py when the container launches
+CMD ["python", "-u", "daemonset-app.py"]
