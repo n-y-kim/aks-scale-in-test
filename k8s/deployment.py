@@ -4,13 +4,14 @@ import logging
 
 logger = logging.getLogger(__name__)
 class Deployment:
-    def __init__(self):
+    def __init__(self, namespace):
         config.load_incluster_config()
         self.api_instance = client.AppsV1Api()
+        self.namespace = namespace
     
     # Update deployment
     # Add priorityClassName(system-node-critical) to the deployment
-    def add_priority_class(self, namespace, deployment_name):
+    def add_priority_class(self, deployment_name):
         body = {
             "spec": {
                 "template": {
@@ -22,12 +23,12 @@ class Deployment:
         }
         resp = self.api_instance.patch_namespaced_deployment(
             name=deployment_name,
-            namespace=namespace,
+            namespace=self.namespace,
             body=body
         )
         return resp
 
-    def delete_priority_class(self, namespace, deployment_name):
+    def delete_priority_class(self, deployment_name):
         body = {
             "spec": {
                 "template": {
@@ -39,15 +40,22 @@ class Deployment:
         }
         resp = self.api_instance.patch_namespaced_deployment(
             name=deployment_name,
-            namespace=namespace,
+            namespace=self.namespace,
             body=body
         )
         return resp
     
-    def create_deployment(self, namespace, yaml_file_path, node_name):
-        
+    def create(self, yaml_file_path, node_name):
+        with open(yaml_file_path) as file:
+            dep = yaml.safe_load(file)
+            # Change the deployment name in the yaml file to <node_name>-log-agent
+            dep['metadata']['name'] = node_name + '-log-agent'
+            resp = self.api_instance.create_namespaced_deployment(
+                body=dep, 
+                namespace=self.namespace)
+            return resp
 
-    def create_shield_deployment(self, namespace, yaml_file_path, node_name):
+    def create_shield_deployment(self, yaml_file_path, node_name):
         with open(yaml_file_path) as file:
             dep = yaml.safe_load(file)
             # Change the node name in the yaml file
@@ -56,23 +64,22 @@ class Deployment:
             dep['metadata']['name'] = 'shield-deployment-' + node_name
             resp = self.api_instance.create_namespaced_deployment(
                 body=dep, 
-                namespace=namespace)
+                namespace=self.namespace)
             return resp
-            #print("Deployment created. status='%s'" % resp.metadata.name)
     
-    def have_deployment(self, namespace, deployment_name):
+    def have_deployment(self, deployment_name):
         # if deployment exist, return True
         try:
-            self.api_instance.read_namespaced_deployment(deployment_name, namespace)
+            self.api_instance.read_namespaced_deployment(deployment_name, self.namespace)
             return True
         except:
             return False
     
-    def delete_deployment(self, namespace, deployment_name):
+    def delete_deployment(self, deployment_name):
         # if deployment exist, delete it
         try:
             body = client.V1DeleteOptions()
-            self.api_instance.delete_namespaced_deployment(deployment_name, namespace, body)
+            self.api_instance.delete_namespaced_deployment(deployment_name, self.namespace, body)
             return True
         except Exception as e:
             logger.info(f"Exception when deleting deployment: {e}")

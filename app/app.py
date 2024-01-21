@@ -44,7 +44,7 @@ def main():
         
         # If the node is candidate for deletion, create shield pod to prevent scale-in
         if my_node_taint == CANDIDATE_TAINT:
-            deploy = Deployment()
+            deploy = Deployment('default')
             
             if deploy.check_other_deployments():
                 logger.info("There are other shield deployments. This node is not the final candidate for deletion.")
@@ -57,7 +57,7 @@ def main():
                 time.sleep(5)
                 continue
             else:
-                response = deploy.create_shield_deployment("default", "shield_app.yaml", my_node_name)
+                response = deploy.create_shield_deployment("shield_app.yaml", my_node_name)
                 # Print create success response
                 logger.info("Shield pod created.")
         
@@ -74,7 +74,7 @@ def main():
             logger.info("Candidate taint added again to prevent un-candidate.")
             
             # Delete shield deployment
-            response = deploy.delete_deployment("default", "shield-deployment-" + my_node_name)
+            response = deploy.delete_deployment("shield-deployment-" + my_node_name)
             logger.info("Shield pod deleted: %s" % response)
             
             # Make this node as the final candidate for deletion
