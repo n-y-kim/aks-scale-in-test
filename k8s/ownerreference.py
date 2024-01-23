@@ -8,8 +8,8 @@ class OwnerReference:
         self.uid = uid
         self.owner_reference = client.V1OwnerReference(
             api_version='apps/v1',
-            block_owner_deletion=True,
-            controller=True,
+            block_owner_deletion=False,
+            controller=False,
             kind=kind,
             name=name,
             uid=uid)
