@@ -15,7 +15,7 @@ def main():
     while True:
         if node.get_node_taint(node_name) == 'DeletionCandidateOfClusterAutoscaler':
             
-            logger.info("DeletionCandidateOfClusterAutoscaler taint found. Setting priorityClassName to system-node-critical.")
+            logger.info("DeletionCandidateOfClusterAutoscaler taint found.")
             
             deployment = Deployment('default')
             deployment_name = node_name + '-log-agent'

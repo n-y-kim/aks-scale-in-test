@@ -81,8 +81,8 @@ class Deployment:
     def delete_deployment(self, deployment_name):
         # if deployment exist, delete it
         try:
-            body = client.V1DeleteOptions()
-            self.api_instance.delete_namespaced_deployment(deployment_name, self.namespace, body)
+            # body = client.V1DeleteOptions()
+            self.api_instance.delete_namespaced_deployment(deployment_name, self.namespace)
             return True
         except Exception as e:
             logger.info(f"Exception when deleting deployment: {e}")

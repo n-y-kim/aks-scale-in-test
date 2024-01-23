@@ -7,6 +7,7 @@ COPY simple-app/app.py simple-app/requirements.txt ./
 # Copy the 'k8s' directory contents into the container at /app/k8s with the same folder name
 COPY ./k8s/ ./k8s/
 COPY ./loggingconfig/ ./loggingconfig/
+COPY ./simple-app-manifest/pdb.yaml ./
 # Install the dependencies
 RUN pip install -r requirements.txt
 # Run dummy_log.py when the container launches

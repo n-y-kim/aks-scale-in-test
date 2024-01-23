@@ -5,7 +5,7 @@ from kubernetes import client, config
 class Pdb:
     def __init__(self, namespace="default"):
         config.load_incluster_config()
-        self.api= client.PolicyV1Api()
+        self.api_instance= client.PolicyV1Api()
         self.namespace = namespace
     
     def add_with_deployment_name(self, deployment_name, yaml_file_path):
@@ -13,7 +13,7 @@ class Pdb:
             pdb = yaml.safe_load(file)
             pdb['metadata']['name'] = deployment_name + '-pdb'
             pdb['spec']['selector']['matchLabels']['deployment'] = deployment_name
-            resp = self.api.create_namespaced_pod_disruption_budget(
+            resp = self.api_instance.create_namespaced_pod_disruption_budget(
                 namespace=self.namespace,
                 body=pdb
             )
