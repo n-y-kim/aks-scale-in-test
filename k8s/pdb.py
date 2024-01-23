@@ -1,12 +1,26 @@
 import logging
+import yaml
 from kubernetes import client, config
 
 class Pdb:
-    def __init__(self):
+    def __init__(self, namespace="default"):
         config.load_incluster_config()
         self.api= client.PolicyV1Api()
+        self.namespace = namespace
+    
+    def add_with_deployment_name(self, deployment_name, yaml_file_path):
+        with open(yaml_file_path) as file:
+            pdb = yaml.safe_load(file)
+            pdb['metadata']['name'] = deployment_name + '-pdb'
+            pdb['spec']['selector']['matchLabels']['deployment'] = deployment_name
+            resp = self.api.create_namespaced_pod_disruption_budget(
+                namespace=self.namespace,
+                body=pdb
+            )
+            return resp
+        
 
-    def patch_pdb(self, pdb_name="log-pdb", namespace="default", min_available=0):
+    def patch_pdb(self, pdb_name="log-pdb", min_available=0):
         # Define the patch
         patch = [{"op": "replace", "path": "/spec/minAvailable", "value": min_available}]
 
@@ -14,7 +28,7 @@ class Pdb:
         try:
             self.api_instance.patch_namespaced_pod_disruption_budget(
                 name=pdb_name,
-                namespace=namespace,
+                namespace=self.namespace,
                 body=patch
             )
         except Exception as e:

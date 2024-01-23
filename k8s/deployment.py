@@ -50,6 +50,9 @@ class Deployment:
             dep = yaml.safe_load(file)
             # Change the deployment name in the yaml file to <node_name>-log-agent
             dep['metadata']['name'] = node_name + '-log-agent'
+            dep['spec']['selector']['matchLabels']['deployment'] = node_name + '-log-agent'
+            dep['spec']['template']['metadata']['labels']['deployment'] = node_name + '-log-agent'
+            
             resp = self.api_instance.create_namespaced_deployment(
                 body=dep, 
                 namespace=self.namespace)
