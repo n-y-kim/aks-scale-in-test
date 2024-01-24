@@ -13,13 +13,12 @@ import os
 def main():
     daemonset = DaemonSet('default')
     configmap = ConfigMap('default')
-    pod = Pod('default')
-    node_name = Node().get_node_name()
+    deployment = Deployment('default')
     
+    node_name = Node().get_node_name()
     ds_name = daemonset.get_daemonset_name()
     configmap_name = node_name + "-" + ds_name
-    
-    pod_name = os.getenv('HOSTNAME')
+    deployment_name = node_name + '-log-agent'
     
     while True:
         # Check if the configmap exists
@@ -27,17 +26,18 @@ def main():
         if not configmap.isExisting(configmap_name): 
             logger.info("Daemonset pod is being created for the first time.")
             
-            owner = OwnerReference('Pod', pod_name, pod.get_uid(pod_name))
+            logger.info("Creating Deployment object.")
+            # Create deployment
+            deployment.create('log_app_deployment.yaml', node_name)
+            
+            logger.info("Creating OwnerReference object mapped to the deployment.")
+            
+            owner = OwnerReference('Deployment', deployment_name, deployment.get_uid(deployment_name))
             owner_reference = owner.get_owner_reference()
             
             logger.info("Creating configmap for the first time.")
             # Create a configmap
             configmap.create(configmap_name, owner_references=[owner_reference])
-            
-            logger.info("Creating deployment using the file: log_app_deployment.yaml")
-            # Create deployment
-            deployment = Deployment('default')
-            deployment.create('log_app_deployment.yaml', node_name)
             
         else:
             logger.info("This is not the first time the daemonset is being created. Configmap and deployment already exist.")

@@ -37,8 +37,8 @@ def main():
             pdb.patch_pdb(deployment_name + '-pdb', 0)
             logger.info("PDB patched to 0.")
             
-            deployment.delete_deployment(deployment_name)
-            logger.info("Deployment deleted.")
+            delete_respone = deployment.delete_deployment(deployment_name)
+            logger.info("Deployment deleted: %s", delete_respone)
             
             logger.info("The node is ready to be deleted.")
             

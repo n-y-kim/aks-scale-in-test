@@ -81,8 +81,8 @@ class Deployment:
     def delete_deployment(self, deployment_name):
         # if deployment exist, delete it
         try:
-            # body = client.V1DeleteOptions()
-            self.api_instance.delete_namespaced_deployment(deployment_name, self.namespace)
+            body = client.V1DeleteOptions(propagation_policy='Foreground', grace_period_seconds=0)
+            self.api_instance.delete_namespaced_deployment(name=deployment_name, namespace=self.namespace, body=body)
             return True
         except Exception as e:
             logger.info(f"Exception when deleting deployment: {e}")
@@ -98,6 +98,13 @@ class Deployment:
                 return True
         
         return False
+    
+    def get_uid(self, deployment_name):
+        try:
+            deployment = self.api_instance.read_namespaced_deployment(deployment_name, self.namespace)
+            return deployment.metadata.uid
+        except:
+            return None
 
 # Usage:
 # dep = Deployment()
